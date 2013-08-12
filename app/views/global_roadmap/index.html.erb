@@ -7,6 +7,7 @@
     <div id="roadmap">
         <% @global_versions.each do |key, value| %>
             <h1><%= key %></h1>
+            <hr/>
             <% value.each do |version| %>
                 <h3 class="version"><%= link_to_version version, :name => version_anchor(version) %></h3>
                 <%= render :partial => 'versions/overview', :locals => {:version => version} %>
@@ -26,7 +27,7 @@
                 <% end %>
                 <%= call_hook :view_projects_roadmap_version_bottom, :version => version %>
             <% end %>
-
+            <br/>
         <% end %>
     </div>
 <% end %>
