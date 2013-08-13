@@ -11,8 +11,8 @@ class GlobalRoadmapController < ApplicationController
     @versions = @versions.uniq.sort
 
     #remove closed versions
-    @completed_versions = @versions.select {|version| version.closed? || version.completed? }
-    @versions -= @completed_versions
+    #@completed_versions = @versions.select {|version| version.closed? || version.completed? }
+    #@versions -= @completed_versions
 
     @issues_by_version = {}
 

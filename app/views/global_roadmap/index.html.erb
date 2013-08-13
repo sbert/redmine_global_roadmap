@@ -7,27 +7,42 @@
     <div id="roadmap">
         <% @global_versions.each do |key, value| %>
             <h1><%= key %></h1>
-            <hr/>
-            <% value.each do |version| %>
-                <h3 class="version"><%= link_to_version version, :name => version_anchor(version) %></h3>
-                <%= render :partial => 'versions/overview', :locals => {:version => version} %>
-                <%= render(:partial => "wiki/content", :locals => {:content => version.wiki_page.content}) if version.wiki_page %>
-                <% if (issues = @issues_by_version[version]) && issues.size > 0 %>
-                    <%= form_tag({}) do -%>
-                        <table class="list related-issues">
-                            <caption><%= l(:label_related_issues) %></caption>
-                            <% issues.each do |issue| -%>
-                                <tr class="hascontextmenu">
-                                    <td class="checkbox"><%= check_box_tag 'ids[]', issue.id, false, :id => nil %></td>
-                                    <td><%= link_to_issue(issue, :project => (@project != issue.project)) %></td>
-                                </tr>
-                            <% end -%>
-                        </table>
+            <table class="list related-issues">
+                <% value.each do |version| %>
+                    <tr>
+                        <td rowspan="<%= ((@issues_by_version[version] || []).size + 1) %>" style="width: 20%">
+                            <h3 class="version"><%= link_to_version version, :name => version_anchor(version) %></h3>
+                        </td>
+                        <td>
+                            <% if version.completed? %>
+                                <p><%= format_date(version.effective_date) %></p>
+                            <% elsif version.effective_date %>
+                                <p><strong><%= due_date_distance_in_words(version.effective_date) %></strong> (<%= format_date(version.effective_date) %>)</p>
+                            <% end %>
+
+                            <p><%=h version.description %></p>
+                        </td>
+                    </tr>
+                    <% if (issues = @issues_by_version[version]) && issues.size > 0 %>
+                        <%= form_tag({}) do -%>
+                                <% issues.each do |issue| -%>
+                                    <tr>
+                                        <td><%= link_to_issue(issue, :project => (@project != issue.project)) %></td>
+                                    </tr>
+                                <% end -%>
+                        <% end %>
+                    <% else %>
+                        <tr>
+                            <td><p class="progress-info"><%= l(:label_roadmap_no_issues) %></p></td>
+                        </tr>
                     <% end %>
+                    <%= call_hook :view_projects_roadmap_version_bottom, :version => version %>
                 <% end %>
-                <%= call_hook :view_projects_roadmap_version_bottom, :version => version %>
-            <% end %>
+            </table>
             <br/>
         <% end %>
     </div>
 <% end %>
+
+<% content_for :sidebar do %>
+<% end%>
