@@ -5,10 +5,10 @@
     <p class="nodata"><%= l(:label_no_data) %></p>
 <% else %>
     <div id="roadmap">
-        <% @global_versions.each do |key, value| %>
-            <h1><%= key %></h1>
+        <% @global_versions.each do |key, global_version| %>
+            <h1><%= global_version.name %></h1>
             <table class="list related-issues">
-                <% value.each do |version| %>
+                <% global_version.versions.each do |version| %>
                     <tr>
                         <td rowspan="<%= ((@issues_by_version[version] || []).size + 1) %>" style="width: 20%">
                             <h3 class="version"><%= link_to_version version, :name => version_anchor(version) %></h3>
@@ -19,8 +19,11 @@
                             <% elsif version.effective_date %>
                                 <p><strong><%= due_date_distance_in_words(version.effective_date) %></strong> (<%= format_date(version.effective_date) %>)</p>
                             <% end %>
-
                             <p><%=h version.description %></p>
+
+                            <% if ((@issues_by_version[version] || []).size == 0) %>
+                                <p class="progress-info"><br/><%= l(:label_roadmap_no_issues) %></p>
+                            <% end %>
                         </td>
                     </tr>
                     <% if (issues = @issues_by_version[version]) && issues.size > 0 %>
@@ -31,10 +34,6 @@
                                     </tr>
                                 <% end -%>
                         <% end %>
-                    <% else %>
-                        <tr>
-                            <td><p class="progress-info"><%= l(:label_roadmap_no_issues) %></p></td>
-                        </tr>
                     <% end %>
                     <%= call_hook :view_projects_roadmap_version_bottom, :version => version %>
                 <% end %>
@@ -45,4 +44,12 @@
 <% end %>
 
 <% content_for :sidebar do %>
-<% end%>
+    <%= form_tag({}, :method => :get) do %>
+        <h3><%= l(:label_roadmap) %></h3>
+        <% @trackers.each do |tracker| %>
+            <label><%= check_box_tag "tracker_ids[]", tracker.id, (@selected_tracker_ids.include? tracker.id.to_s), :id => nil %>
+                <%=h tracker.name %></label><br />
+        <% end %>
+        <p><%= submit_tag l(:button_apply), :class => 'button-small', :name => nil %></p>
+    <% end %>
+<% end %>
